@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import { FetchAPI } from './Service/Fetch-api';
 import ImageGallery from './ImageGallery/ImageGallery';
@@ -8,65 +8,57 @@ import css from './App.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
-  state = {
-    hits: [],
-    page: 1,
-    isLoading: false,
-    error: null,
-    failedRequest: false,
-  };
+export function App() {
+  const [hits, setHits] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [failedRequest, setFailedRequest] = useState(false);
 
-  handleFormSubmit = async searchQuery => {
-    this.setState({ isLoading: true, searchQuery });
+  const handleFormSubmit = async failedRequest => {
+    setIsLoading(true);
+    setFailedRequest(failedRequest);
 
     try {
-      const response = await FetchAPI(searchQuery);
+      const response = await FetchAPI(failedRequest);
       if (response.length === 0) {
-        this.setState({ failedRequest: true });
+        setFailedRequest(true);
         toast.error('Nothing found!');
-      } else this.setState({ hits: response, failedRequest: false });
+      } else setHits(response);
+      setFailedRequest(false);
     } catch (error) {
-      this.setState({ error });
+      setError({ error });
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleLoadMore = async () => {
-    const { page, searchQuery } = this.state;
-
-    this.setState({
-      isLoading: true,
-      page: page + 1,
-    });
+  const handleLoadMore = async () => {
+    setIsLoading(true);
+    setPage(page + 1);
 
     try {
-      const response = await FetchAPI(searchQuery, page + 1);
-      this.setState(prevState => ({
-        hits: [...prevState.hits, ...response],
-      }));
+      const response = await FetchAPI(failedRequest, page + 1);
+      setHits([...hits, ...response]);
     } catch (error) {
-      this.setState({ error });
+      setError({ error });
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  render() {
-    const { isLoading, error, hits } = this.state;
+  // const { isLoading, error, hits } = this.state;
 
-    return (
-      <>
-        <div className={css.App}>
-          {error && <p>something went wrong: {error.message}</p>}
-          <Searchbar onSubmit={this.handleFormSubmit} />
-          {isLoading && <Loader />}
-          <ImageGallery imageData={hits} />
-          {hits.length > 11 && <Button onClick={this.handleLoadMore} />}
-          <ToastContainer />
-        </div>
-      </>
-    );
-  }
+  return (
+    <>
+      <div className={css.App}>
+        {error && <p>something went wrong: {error.message}</p>}
+        <Searchbar onSubmit={handleFormSubmit} />
+        {isLoading && <Loader />}
+        <ImageGallery imageData={hits} />
+        {hits.length > 11 && <Button onClick={handleLoadMore} />}
+        <ToastContainer />
+      </div>
+    </>
+  );
 }
