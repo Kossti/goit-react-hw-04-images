@@ -13,19 +13,20 @@ export function App() {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [failedRequest, setFailedRequest] = useState(false);
+  // const [failedRequest, setFailedRequest] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const handleFormSubmit = async failedRequest => {
+  const handleFormSubmit = async searchQuery => {
     setIsLoading(true);
-    setFailedRequest(failedRequest);
+    setSearchQuery(searchQuery);
 
     try {
-      const response = await FetchAPI(failedRequest);
+      const response = await FetchAPI(searchQuery);
       if (response.length === 0) {
-        setFailedRequest(true);
+        setSearchQuery(true);
         toast.error('Nothing found!');
       } else setHits(response);
-      setFailedRequest(false);
+      setPage(page);
     } catch (error) {
       setError({ error });
     } finally {
@@ -34,11 +35,12 @@ export function App() {
   };
 
   const handleLoadMore = async () => {
-    setIsLoading(true);
+    setIsLoading(isLoading);
     setPage(page + 1);
+    setSearchQuery(searchQuery);
 
     try {
-      const response = await FetchAPI(failedRequest, page + 1);
+      const response = await FetchAPI(searchQuery, page + 1);
       setHits([...hits, ...response]);
     } catch (error) {
       setError({ error });
@@ -46,8 +48,6 @@ export function App() {
       setIsLoading(false);
     }
   };
-
-  // const { isLoading, error, hits } = this.state;
 
   return (
     <>
