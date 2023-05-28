@@ -26,7 +26,7 @@ export function App() {
         setSearchQuery(true);
         toast.error('Nothing found!');
       } else setHits(response);
-      setPage(page);
+      setPage(1);
     } catch (error) {
       setError({ error });
     } finally {
