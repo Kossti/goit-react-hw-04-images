@@ -19,6 +19,7 @@ export function App() {
   const handleFormSubmit = async searchQuery => {
     setIsLoading(true);
     setSearchQuery(searchQuery);
+    setHits([]);
 
     try {
       const response = await FetchAPI(searchQuery);
@@ -26,11 +27,12 @@ export function App() {
         setSearchQuery(true);
         toast.error('Nothing found!');
       } else setHits(response);
-      setPage(page);
+      setPage(1);
     } catch (error) {
       setError({ error });
     } finally {
       setIsLoading(false);
+      setSearchQuery(searchQuery);
     }
   };
 
@@ -41,7 +43,7 @@ export function App() {
 
     try {
       const response = await FetchAPI(searchQuery, page + 1);
-      setHits([...hits, ...response]);
+      setHits(prevHits => [...prevHits, ...response]);
     } catch (error) {
       setError({ error });
     } finally {
